@@ -113,9 +113,24 @@ salary data by country × experience × sector is out of scope, so:
 typically earns?" If filled, the score is personal and genuinely meaningful, and
 the user owns the assumption rather than trusting our numbers.
 
-**Fallback:** if left blank, a documented per-country median full-time wage,
-adjusted by the experience and sector inputs. The fallback's source and
-staleness are stated in the UI so the number is never presented as authoritative.
+**Fallback:** if left blank, published wage data for the user's country,
+adjusted by the education and experience inputs.
+
+Sourcing this during implementation turned up a constraint the design did not
+anticipate: **no per-country median wage series exists in PPP USD.** OECD's
+`AV_AN_WAGE` publishes means only (its `AGGREGATION_OPERATION` dimension is
+`MEAN`-only), and its companion decile dataset gives ratios rather than levels.
+So the fallback carries two different statistics:
+
+- **12 OECD countries** — mean annual wage, 2025. Means run roughly 15-20%
+  above medians because of the top tail, so this is a harder bar than a median.
+- **Everywhere else** — the ILO Global Wage Report's global median, 2021.
+
+Rather than fabricate a median or discard the better per-country data, both are
+kept and `benchmarkSource` records which one a given score used. The UI labels
+the yardstick and its year, so a score is never presented as more comparable
+than it is. Scores from a covered and an uncovered country are not strictly
+comparable, and the interface says so rather than hiding it.
 
 ## Architecture
 
