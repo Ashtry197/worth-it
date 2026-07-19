@@ -40,7 +40,7 @@ export function resolveBenchmark(
 
   const adjusted =
     countryAverage *
-    EDUCATION_MULTIPLIER[input.education] *
+    (EDUCATION_MULTIPLIER[input.education] ?? 1.0) *
     experienceMultiplier(input.yearsExperience);
 
   return { hourly: adjusted / STANDARD_HOURS_PER_YEAR, source: "country-average" };

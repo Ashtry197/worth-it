@@ -32,6 +32,13 @@ describe("CompensationFields", () => {
     const select = screen.getByLabelText(/country/i) as HTMLSelectElement;
     expect(select.options.length).toBeGreaterThan(170);
   });
+
+  it("labels countries by name, not bare ISO code", () => {
+    render(<CompensationFields value={value} onChange={vi.fn()} />);
+    const select = screen.getByLabelText(/country/i) as HTMLSelectElement;
+    const labels = Array.from(select.options).map((o) => o.textContent);
+    expect(labels).toContain("United Kingdom");
+  });
 });
 
 describe("TimeFields", () => {

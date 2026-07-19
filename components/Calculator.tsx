@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { CompensationFields } from "./form/CompensationFields";
 import { TimeFields } from "./form/TimeFields";
 import { QualityFields } from "./form/QualityFields";
@@ -23,18 +23,19 @@ export function Calculator() {
   const [input, setInput] = useState<JobInput>(INITIAL);
 
   useEffect(() => {
+    // localStorage is unavailable during the static export's build-time render,
+    // so this must run after mount. A lazy useState initialiser would bake "US"
+    // into the prerendered HTML and hydrate to a different value.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setInput((prev) => ({ ...prev, country: loadCountry() }));
   }, []);
 
   const onChange = (patch: Partial<JobInput>) => {
-    setInput((prev) => {
-      const next = { ...prev, ...patch };
-      if (patch.country) saveCountry(patch.country);
-      return next;
-    });
+    if (patch.country) saveCountry(patch.country);
+    setInput((prev) => ({ ...prev, ...patch }));
   };
 
-  const result = useMemo(() => calculateScore(input), [input]);
+  const result = calculateScore(input);
 
   return (
     <div className="grid gap-8 lg:grid-cols-[2fr_1fr]">

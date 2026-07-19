@@ -63,9 +63,10 @@ export function NumberField({
 }
 
 export function SelectField<T extends string>({
-  label, value, options, onChange,
+  label, hint, value, options, onChange,
 }: {
   label: string;
+  hint?: string;
   value: T;
   options: ReadonlyArray<{ value: T; label: string }>;
   onChange: (v: T) => void;
@@ -73,6 +74,7 @@ export function SelectField<T extends string>({
   return (
     <label className="block">
       <span className="text-sm font-medium">{label}</span>
+      {hint && <span className="block text-xs text-gray-500">{hint}</span>}
       <select
         className="mt-1 w-full rounded border px-2 py-1"
         value={value}

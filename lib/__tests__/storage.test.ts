@@ -77,4 +77,11 @@ describe("country preference", () => {
     window.localStorage.setItem("worthit:country", "not-a-code");
     expect(loadCountry()).toBe("US");
   });
+
+  it("rejects a stored country that isn't in the PPP table", () => {
+    // "ZZ" matches the old /^[A-Z]{2}$/ shape check but names no real
+    // country, so it must be validated against actual PPP data, not format.
+    window.localStorage.setItem("worthit:country", "ZZ");
+    expect(loadCountry()).toBe("US");
+  });
 });

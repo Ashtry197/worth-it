@@ -35,14 +35,18 @@ const money = (n: number) =>
 
 export function ScoreDisplay({ result }: { result: ScoreResult }) {
   if (!result.ok) {
-    return <p className="text-gray-500">{ERROR_COPY[result.reason]}</p>;
+    return (
+      <p aria-live="polite" aria-atomic="true" className="text-gray-500">
+        {ERROR_COPY[result.reason]}
+      </p>
+    );
   }
 
   const b = result.breakdown;
   const { label, className } = band(b.score);
 
   return (
-    <div className="space-y-4">
+    <div aria-live="polite" aria-atomic="true" className="space-y-4">
       <div>
         <p data-testid="score-value" className={`text-5xl font-bold ${className}`}>
           {b.score.toFixed(2)}
@@ -54,7 +58,7 @@ export function ScoreDisplay({ result }: { result: ScoreResult }) {
       </div>
 
       <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-        <dt className="text-gray-500">Total compensation</dt>
+        <dt className="text-gray-500">Total compensation (local currency)</dt>
         <dd>{money(b.totalComp)}</dd>
         <dt className="text-gray-500">Working days per year</dt>
         <dd>{b.workDaysPerYear}</dd>

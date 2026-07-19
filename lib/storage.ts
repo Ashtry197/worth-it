@@ -1,3 +1,5 @@
+import { pppFactors } from "@/lib/ppp";
+
 export interface SavedResult {
   id: string;
   at: number;
@@ -78,7 +80,9 @@ export function clearHistory(): void {
 
 export function loadCountry(): string {
   const raw = readRaw(COUNTRY_KEY);
-  return raw && /^[A-Z]{2}$/.test(raw) ? raw : DEFAULT_COUNTRY;
+  return raw && Object.prototype.hasOwnProperty.call(pppFactors, raw)
+    ? raw
+    : DEFAULT_COUNTRY;
 }
 
 export function saveCountry(country: string): void {

@@ -59,10 +59,7 @@ export function calculateScore(input: JobInput): ScoreResult {
     input.salary + input.employerHealthcare + input.pensionMatch;
 
   // Remote days act only here, reducing commute exposure.
-  const remoteDays = Math.min(
-    Math.max(input.remoteDaysPerWeek, 0),
-    input.workDaysPerWeek,
-  );
+  const remoteDays = Math.min(input.remoteDaysPerWeek, input.workDaysPerWeek);
   const officeDaysRatio =
     (input.workDaysPerWeek - remoteDays) / input.workDaysPerWeek;
 

@@ -4,9 +4,11 @@ import { NumberField, SelectField, Section } from "./Field";
 import { pppFactors } from "@/lib/ppp";
 import type { JobInput } from "@/lib/types";
 
+const regionNames = new Intl.DisplayNames(["en"], { type: "region" });
+
 const COUNTRIES = Object.keys(pppFactors)
-  .sort()
-  .map((code) => ({ value: code, label: code }));
+  .map((code) => ({ value: code, label: regionNames.of(code) ?? code }))
+  .sort((a, b) => a.label.localeCompare(b.label));
 
 export function CompensationFields({
   value, onChange,

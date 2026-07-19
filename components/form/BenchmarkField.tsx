@@ -36,6 +36,7 @@ export function BenchmarkField({
       />
       <SelectField
         label="Employer type"
+        hint="Recorded with your result; doesn't affect the score yet"
         value={value.employerType}
         options={EMPLOYER_TYPES}
         onChange={(employerType) => onChange({ employerType })}
