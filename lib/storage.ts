@@ -54,10 +54,18 @@ export function loadHistory(): SavedResult[] {
 }
 
 export function saveResult(result: SavedResult): void {
-  const next = [result, ...loadHistory()]
-    .sort((a, b) => b.at - a.at)
-    .slice(0, MAX_HISTORY);
-  writeRaw(HISTORY_KEY, JSON.stringify(next));
+  // The whole body is guarded, not just the write: JSON.stringify is an
+  // argument expression, so it evaluates in this frame, outside writeRaw's
+  // try/catch. A caller that spreads a richer object into SavedResult could
+  // carry a circular reference and throw here.
+  try {
+    const next = [result, ...loadHistory()]
+      .sort((a, b) => b.at - a.at)
+      .slice(0, MAX_HISTORY);
+    writeRaw(HISTORY_KEY, JSON.stringify(next));
+  } catch {
+    /* ignore — history is a convenience, not a requirement */
+  }
 }
 
 export function clearHistory(): void {

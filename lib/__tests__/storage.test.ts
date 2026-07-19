@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import {
-  loadHistory, saveResult, clearHistory, loadCountry, saveCountry,
+  loadHistory, saveResult, clearHistory, loadCountry, saveCountry, type SavedResult,
 } from "@/lib/storage";
 
 beforeEach(() => {
@@ -52,6 +52,14 @@ describe("history", () => {
       throw new Error("QuotaExceededError");
     });
     expect(() => saveResult(entry)).not.toThrow();
+  });
+
+  it("degrades quietly when the entry cannot be serialised", () => {
+    // JSON.stringify is an argument expression, so it runs outside the
+    // write guard. A circular reference must not escape saveResult.
+    const circular = { ...entry } as SavedResult & { self?: unknown };
+    circular.self = circular;
+    expect(() => saveResult(circular)).not.toThrow();
   });
 });
 
