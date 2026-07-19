@@ -1,28 +1,58 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+
+/** "" means the user cleared the field, which scores as a missing value.
+ *  Anything unparseable yields NaN, which lib/scoring.ts rejects with a
+ *  typed "invalid-number" error rather than scoring garbage. */
+function parseDraft(text: string): number {
+  const trimmed = text.trim();
+  return trimmed === "" ? 0 : Number(trimmed);
+}
 
 export function NumberField({
-  label, hint, value, min = 0, step = 1, onChange,
+  label, hint, value, onChange,
 }: {
   label: string;
   hint?: string;
   value: number;
-  min?: number;
-  step?: number;
   onChange: (n: number) => void;
 }) {
+  // The field owns its in-progress text. A controlled <input type="number">
+  // cannot: the browser sanitises incomplete values like "1." or "1e" to ""
+  // before JavaScript sees them, which reads as "cleared", emits 0, and then
+  // stomps the user's typing on the next render — so "1.5" typed by hand
+  // becomes 0, then 05. type="text" with inputMode="decimal" keeps the
+  // numeric keypad on mobile without the sanitisation.
+  const [draft, setDraft] = useState(() => String(value));
+
+  // Re-sync only when the parent's value genuinely diverges from the draft,
+  // so external resets land while ordinary typing is never overwritten.
+  // Object.is, not ===, so a NaN draft matches a NaN value.
+  useEffect(() => {
+    // This is the "adjust state when a prop changes" exception (react.dev),
+    // not a derived-render candidate: it must compare against the previous
+    // draft, which only exists once this effect has already committed.
+    if (!Object.is(parseDraft(draft), value)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setDraft(Number.isFinite(value) ? String(value) : "");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
+
   return (
     <label className="block">
       <span className="text-sm font-medium">{label}</span>
       {hint && <span className="block text-xs text-gray-500">{hint}</span>}
       <input
-        type="number"
+        type="text"
+        inputMode="decimal"
         className="mt-1 w-full rounded border px-2 py-1"
-        value={Number.isFinite(value) ? value : ""}
-        min={min}
-        step={step}
-        onChange={(e) => onChange(e.target.value === "" ? 0 : Number(e.target.value))}
+        value={draft}
+        onChange={(e) => {
+          setDraft(e.target.value);
+          onChange(parseDraft(e.target.value));
+        }}
       />
     </label>
   );

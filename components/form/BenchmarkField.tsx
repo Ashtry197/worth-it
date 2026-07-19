@@ -38,7 +38,6 @@ export function BenchmarkField({
         label="Typical salary for your role"
         hint="Optional, but makes your score far more meaningful"
         value={value.expectedSalary ?? 0}
-        step={1000}
         onChange={(n) => onChange({ expectedSalary: n > 0 ? n : null })}
       />
       <SelectField
