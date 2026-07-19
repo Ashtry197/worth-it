@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Worth It
 
-## Getting Started
+Is your job actually worth it? Scores a job on pay, hours, commute, conditions
+and benefits rather than salary alone, and measures it against a market
+benchmark. A score of 1.00 means typical for your market.
 
-First, run the development server:
+Everything runs in your browser. There are no ads, no analytics, no trackers,
+and no network calls of any kind — a test enforces this.
+
+## Development
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev      # http://localhost:3000
+npm test         # vitest
+npm run build    # static export to out/
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## How the score works
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+totalComp        = salary + employerHealthcare + pensionMatch
+workDaysPerYear  = 52 x workDaysPerWeek - ptoDays
+officeDaysRatio  = (workDaysPerWeek - remoteDaysPerWeek) / workDaysPerWeek
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+adjustedDailyPay = (totalComp / workDaysPerYear) converted to PPP USD
+effectiveHours   = workHours + commute x officeDaysRatio - 0.5 x restHours
 
-## Learn More
+score = (adjustedDailyPay / effectiveHours) x environment x management
+        x colleagues / benchmark
+```
 
-To learn more about Next.js, take a look at the following resources:
+Each input is counted exactly once. Money is treated as money, time as time,
+and only subjective judgements are multipliers.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## What the benchmark actually is
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The most meaningful score comes from filling in "typical salary for your role" —
+then you are measured against your own market, and you own the assumption.
 
-## Deploy on Vercel
+Left blank, the score falls back to published wage data, and that data is not
+uniform. No per-country **median** wage series exists in PPP USD: OECD's
+`AV_AN_WAGE` publishes means only. So the fallback uses two different statistics:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Countries | Source | Statistic | Year |
+|---|---|---|---|
+| 12 OECD markets | OECD `AV_AN_WAGE` | **mean** | 2025 |
+| Everywhere else | ILO Global Wage Report | **median** | 2021 |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Means run roughly 15-20% above medians, so a fallback score in a covered country
+is measured against a harder bar than one elsewhere. The two are not strictly
+comparable, and the UI labels which yardstick each score used rather than hiding
+it. Both are all-role national aggregates — a coarse proxy for any individual.
+
+## Working on OneDrive
+
+This project lives on a OneDrive-synced path. Exclude `node_modules` and
+`.next` in the OneDrive client — syncing tens of thousands of files causes
+sync storms and file-locking failures during builds. `.gitignore` covers git,
+but not OneDrive.
+
+Under WSL, `/mnt/c` is slow because filesystem calls cross the drvfs boundary.
+If installs and hot-reload get annoying, run Node from Windows instead.
+
+## Credits
+
+The PPP dataset and the original idea come from
+[Zippland/worth-calculator](https://github.com/Zippland/worth-calculator) (MIT).
+The scoring model here is a substantial rework — see `NOTICE` and
+`docs/superpowers/specs/`.
