@@ -145,9 +145,12 @@ export function ScoreDisplay({ result }: { result: ScoreResult }) {
       {/* The score is the thing they came for, so it leads and never hides
           behind a placeholder — an earlier version showed "2+" large with the
           real figure in small text, which buried the answer. */}
+      {/* Display face, not the mono .tnum used elsewhere: at hero size the
+          monospace decimal point floats in its own wide cell and reads as
+          "2 . 84". The ledger rows below keep mono, where columns must align. */}
       <p
         data-testid="score-value"
-        className={`tnum mt-3 text-5xl leading-none font-semibold sm:text-6xl ${tone}`}
+        className={`mt-3 font-display text-6xl leading-none font-semibold tracking-tight sm:text-7xl ${tone}`}
       >
         {b.score.toFixed(2)}
       </p>
