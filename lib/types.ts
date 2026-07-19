@@ -60,7 +60,10 @@ export type ScoreError =
   | "missing-salary"
   | "non-positive-hours"
   | "invalid-country"
-  | "invalid-work-days";
+  | "invalid-work-days"
+  /** A numeric field was NaN, Infinity, or negative. Reachable in normal use:
+   *  the form recomputes on every keystroke, and Number("1e") is NaN. */
+  | "invalid-number";
 
 export type ScoreResult =
   | { ok: true; breakdown: ScoreBreakdown }

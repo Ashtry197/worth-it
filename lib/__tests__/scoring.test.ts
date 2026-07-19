@@ -145,6 +145,59 @@ describe("calculateScore — error handling", () => {
     expect(r).toEqual({ ok: false, reason: "invalid-country" });
   });
 
+  it("rejects an inherited property masquerading as a country", () => {
+    // A bare pppFactors[country] lookup returns Object.prototype.constructor
+    // here — truthy, so it would pass a `=== undefined` guard.
+    const r = calculateScore(baseInput({ country: "constructor" }));
+    expect(r).toEqual({ ok: false, reason: "invalid-country" });
+  });
+
+  it("rejects NaN in any numeric field rather than scoring it", () => {
+    // NaN <= 0 is false, so NaN slips past ordinary range guards. The form
+    // recomputes on every keystroke and Number("1e") is NaN, so this is a
+    // reachable state, not a theoretical one.
+    for (const field of [
+      "salary", "workHoursPerDay", "workDaysPerWeek", "commuteHoursPerDay",
+      "restHoursPerDay", "ptoDays", "remoteDaysPerWeek", "environment",
+    ] as const) {
+      const r = calculateScore(baseInput({ [field]: NaN }));
+      expect(r, `${field} = NaN must be rejected`).toEqual({
+        ok: false,
+        reason: "invalid-number",
+      });
+    }
+  });
+
+  it("rejects Infinity rather than scoring it", () => {
+    const r = calculateScore(baseInput({ salary: Infinity }));
+    expect(r).toEqual({ ok: false, reason: "invalid-number" });
+  });
+
+  it("rejects a NaN expected salary", () => {
+    const r = calculateScore(baseInput({ expectedSalary: NaN }));
+    expect(r).toEqual({ ok: false, reason: "invalid-number" });
+  });
+
+  it("rejects negative money and time inputs", () => {
+    for (const field of ["employerHealthcare", "ptoDays", "commuteHoursPerDay"] as const) {
+      const r = calculateScore(baseInput({ [field]: -1 }));
+      expect(r, `${field} = -1 must be rejected`).toEqual({
+        ok: false,
+        reason: "invalid-number",
+      });
+    }
+  });
+
+  it("never returns a non-finite score on any accepted input", () => {
+    const r = calculateScore(baseInput());
+    if (!r.ok) throw new Error("expected ok");
+    for (const [key, value] of Object.entries(r.breakdown)) {
+      if (typeof value === "number") {
+        expect(Number.isFinite(value), `${key} must be finite`).toBe(true);
+      }
+    }
+  });
+
   it("clamps remote days to the number of work days", () => {
     const r = calculateScore(
       baseInput({ workDaysPerWeek: 5, remoteDaysPerWeek: 9, commuteHoursPerDay: 2 }),

@@ -3,11 +3,45 @@ import { pppFactors, toPppUsd } from "@/lib/ppp";
 import { resolveBenchmark } from "@/lib/benchmark";
 import { WEEKS_PER_YEAR } from "@/lib/constants";
 
+/** Every numeric field, checked before anything else. NaN defeats ordinary
+ *  range guards silently — `NaN <= 0` is false, so a NaN would pass every
+ *  check below and surface as `{ ok: true, score: NaN }`. */
+const NUMERIC_FIELDS = [
+  "salary",
+  "employerHealthcare",
+  "pensionMatch",
+  "workHoursPerDay",
+  "workDaysPerWeek",
+  "remoteDaysPerWeek",
+  "commuteHoursPerDay",
+  "ptoDays",
+  "restHoursPerDay",
+  "environment",
+  "management",
+  "colleagues",
+  "yearsExperience",
+] as const satisfies ReadonlyArray<keyof JobInput>;
+
 export function calculateScore(input: JobInput): ScoreResult {
+  for (const field of NUMERIC_FIELDS) {
+    const value = input[field];
+    if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
+      return { ok: false, reason: "invalid-number" };
+    }
+  }
+  if (
+    input.expectedSalary !== null &&
+    (!Number.isFinite(input.expectedSalary) || input.expectedSalary < 0)
+  ) {
+    return { ok: false, reason: "invalid-number" };
+  }
+
   if (!input.salary || input.salary <= 0) {
     return { ok: false, reason: "missing-salary" };
   }
-  if (pppFactors[input.country] === undefined) {
+  // hasOwnProperty, not a bare lookup: pppFactors["constructor"] would
+  // otherwise return an inherited function and pass as a valid country.
+  if (!Object.prototype.hasOwnProperty.call(pppFactors, input.country)) {
     return { ok: false, reason: "invalid-country" };
   }
   if (input.workDaysPerWeek <= 0) {
