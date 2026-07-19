@@ -126,11 +126,27 @@ So the fallback carries two different statistics:
   above medians because of the top tail, so this is a harder bar than a median.
 - **Everywhere else** — the ILO Global Wage Report's global median, 2021.
 
-Rather than fabricate a median or discard the better per-country data, both are
-kept and `benchmarkSource` records which one a given score used. The UI labels
-the yardstick and its year, so a score is never presented as more comparable
-than it is. Scores from a covered and an uncovered country are not strictly
-comparable, and the interface says so rather than hiding it.
+Rather than fabricate a median, the OECD means are kept and `benchmarkSource`
+records which yardstick a score used. The UI labels it and its year.
+
+**The global-median path is not scored at all.** An earlier revision fell back
+to the ILO global median for uncovered countries. End-to-end tracing during the
+final review showed why that fails: the global median is roughly 10,000 PPP USD,
+far below most national medians, so a median earner in Poland scored **4.79
+("Excellent")** and in India **1.90**, under a headline reading "1.00 means
+typical for your market". The number was 2-5x wrong and the claim was false.
+
+A label cannot rescue a number that wrong. So when a country has no national
+wage data and the user has given no estimate, the calculator **declines to
+score** and asks for one instead:
+
+> We don't have wage data for your country — enter a typical salary for your
+> role to get a score.
+
+The user's own estimate is accurate for their market, which converts a
+misleading number into one good answer. The 12 covered countries are unaffected.
+This removes the ILO figure from the product entirely; carrying data that can
+never produce a shown score would be debt, so it is deleted rather than kept.
 
 ## Architecture
 
