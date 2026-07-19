@@ -2,13 +2,12 @@
 
 import type { ScoreResult, ScoreError, ScoreBreakdown } from "@/lib/types";
 
-/** The three benchmarks are different statistics from different years, so the
- *  score must say which one it was measured against rather than implying all
- *  scores are comparable. See lib/medianWages.ts. */
+/** The two benchmarks are different statistics, so the score must say which
+ *  one it was measured against rather than implying all scores are
+ *  comparable. See lib/medianWages.ts. */
 const BENCHMARK_SOURCE_LABEL: Record<ScoreBreakdown["benchmarkSource"], string> = {
   user: "your estimate",
   "country-average": "country average",
-  "global-median": "global median",
 };
 
 const ERROR_COPY: Record<ScoreError, string> = {
@@ -19,6 +18,8 @@ const ERROR_COPY: Record<ScoreError, string> = {
   "invalid-work-days":
     "Check your work days and paid leave — they leave no working days in the year.",
   "invalid-number": "Some numbers aren't valid — check for blanks or typos.",
+  "benchmark-unavailable":
+    "We don't have wage data for your country — enter a typical salary for your role to get a score.",
 };
 
 function band(score: number): { label: string; className: string } {

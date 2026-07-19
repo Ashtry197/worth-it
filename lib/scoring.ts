@@ -81,8 +81,11 @@ export function calculateScore(input: JobInput): ScoreResult {
   const qualityMultiplier =
     input.environment * input.management * input.colleagues;
 
-  const { hourly: benchmark, source: benchmarkSource } =
-    resolveBenchmark(input);
+  const resolvedBenchmark = resolveBenchmark(input);
+  if (resolvedBenchmark === null) {
+    return { ok: false, reason: "benchmark-unavailable" };
+  }
+  const { hourly: benchmark, source: benchmarkSource } = resolvedBenchmark;
 
   const score = (rawHourly * qualityMultiplier) / benchmark;
 

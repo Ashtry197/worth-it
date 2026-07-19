@@ -1,6 +1,6 @@
 import type { JobInput, EducationLevel } from "@/lib/types";
 import { toPppUsd } from "@/lib/ppp";
-import { averageAnnualWage, GLOBAL_MEDIAN_WAGE_USD } from "@/lib/medianWages";
+import { averageAnnualWage } from "@/lib/medianWages";
 import { STANDARD_HOURS_PER_YEAR } from "@/lib/constants";
 
 /** Multipliers on the country median. Applied only to the fallback path —
@@ -23,7 +23,7 @@ function experienceMultiplier(years: number): number {
 
 export function resolveBenchmark(
   input: JobInput,
-): { hourly: number; source: "user" | "country-average" | "global-median" } {
+): { hourly: number; source: "user" | "country-average" } | null {
   if (input.expectedSalary && input.expectedSalary > 0) {
     return {
       hourly: toPppUsd(input.expectedSalary, input.country) / STANDARD_HOURS_PER_YEAR,
@@ -31,16 +31,17 @@ export function resolveBenchmark(
     };
   }
 
-  // The two fallbacks are different statistics from different years, so which
-  // one we used is reported back rather than flattened into "fallback".
+  // No user estimate. Only countries with a sourced OECD figure can be
+  // scored — everywhere else there is no honest benchmark to divide by.
   const countryAverage = averageAnnualWage[input.country];
-  const base = countryAverage ?? GLOBAL_MEDIAN_WAGE_USD;
-  const source = countryAverage === undefined ? "global-median" : "country-average";
+  if (countryAverage === undefined) {
+    return null;
+  }
 
   const adjusted =
-    base *
+    countryAverage *
     EDUCATION_MULTIPLIER[input.education] *
     experienceMultiplier(input.yearsExperience);
 
-  return { hourly: adjusted / STANDARD_HOURS_PER_YEAR, source };
+  return { hourly: adjusted / STANDARD_HOURS_PER_YEAR, source: "country-average" };
 }

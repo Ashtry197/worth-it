@@ -6,7 +6,7 @@ import type { JobInput } from "@/lib/types";
 import { useState } from "react";
 import { QualityFields } from "@/components/form/QualityFields";
 import { BenchmarkField } from "@/components/form/BenchmarkField";
-import { WAGE_YEAR, GLOBAL_MEDIAN_WAGE_YEAR } from "@/lib/medianWages";
+import { WAGE_YEAR } from "@/lib/medianWages";
 
 const value: JobInput = {
   salary: 60_000, employerHealthcare: 0, pensionMatch: 0, country: "US",
@@ -115,16 +115,15 @@ describe("QualityFields", () => {
 });
 
 describe("BenchmarkField", () => {
-  it("names both wage sources and both vintages when falling back", () => {
-    // The two fallbacks are different statistics from different years.
-    // Copy that says only "median wage for your country" was a real
-    // earlier defect — this pins the corrected wording.
+  it("describes the OECD mean and warns uncovered countries need an estimate", () => {
+    // Only one statistic remains (the OECD mean) now that the ILO global
+    // median fallback has been deleted; copy claiming a global fallback
+    // still exists would be a false promise.
     render(<BenchmarkField value={{ ...value, expectedSalary: null }} onChange={vi.fn()} />);
     const note = screen.getByText(/published wage data/i);
     expect(note.textContent).toMatch(/mean/i);
     expect(note.textContent).toContain(String(WAGE_YEAR));
-    expect(note.textContent).toContain(String(GLOBAL_MEDIAN_WAGE_YEAR));
-    expect(note.textContent).toMatch(/ILO/i);
+    expect(note.textContent).toMatch(/enter a typical salary/i);
   });
 
   it("hides the fallback disclosure once an estimate is given", () => {

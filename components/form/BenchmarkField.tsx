@@ -1,13 +1,7 @@
 "use client";
 
 import { NumberField, SelectField, Section } from "./Field";
-import {
-  averageAnnualWage,
-  WAGE_SOURCE,
-  WAGE_YEAR,
-  GLOBAL_MEDIAN_SOURCE,
-  GLOBAL_MEDIAN_WAGE_YEAR,
-} from "@/lib/medianWages";
+import { averageAnnualWage, WAGE_SOURCE, WAGE_YEAR } from "@/lib/medianWages";
 import type { JobInput, EmployerType, EducationLevel } from "@/lib/types";
 
 const EMPLOYER_TYPES: ReadonlyArray<{ value: EmployerType; label: string }> = [
@@ -60,11 +54,12 @@ export function BenchmarkField({
       {usingFallback && (
         <p className="text-xs text-gray-500 sm:col-span-2">
           No estimate given, so your score is measured against published wage
-          data for your country, adjusted for education and experience. For{" "}
-          {Object.keys(averageAnnualWage).length} countries that is{" "}
-          {WAGE_SOURCE} ({WAGE_YEAR}); elsewhere it is {GLOBAL_MEDIAN_SOURCE} (
-          {GLOBAL_MEDIAN_WAGE_YEAR}). Both are all-role figures across a whole
-          country, so treat the result as a rough guide.
+          data for your country, adjusted for education and experience. This
+          is only available for {Object.keys(averageAnnualWage).length}{" "}
+          countries — {WAGE_SOURCE} ({WAGE_YEAR}), an all-role mean rather
+          than a median, so treat the result as a rough guide. For countries
+          outside that table, enter a typical salary above to get a score —
+          we don&apos;t have national wage data to fall back on.
         </p>
       )}
     </Section>

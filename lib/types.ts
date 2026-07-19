@@ -47,12 +47,13 @@ export interface ScoreBreakdown {
   rawHourly: number;
   qualityMultiplier: number;
   benchmark: number;
-  /** Which yardstick the score was measured against. These differ in both
-   *  statistic and vintage, so the UI must label which one was used:
+  /** Which yardstick the score was measured against:
    *  - "user"            the user's own estimate
    *  - "country-average" OECD mean annual wage, 2025, 12 countries
-   *  - "global-median"   ILO global median wage, 2021, everywhere else */
-  benchmarkSource: "user" | "country-average" | "global-median";
+   *  Countries outside those 12 with no user estimate are not scored at
+   *  all — see the "benchmark-unavailable" ScoreError below — so no third
+   *  member exists here. */
+  benchmarkSource: "user" | "country-average";
   score: number;
 }
 
@@ -63,7 +64,12 @@ export type ScoreError =
   | "invalid-work-days"
   /** A numeric field was NaN, Infinity, or negative. Reachable in normal use:
    *  the form recomputes on every keystroke, and Number("1e") is NaN. */
-  | "invalid-number";
+  | "invalid-number"
+  /** No national wage data exists for the user's country and they gave no
+   *  expected-salary estimate, so there is no honest benchmark to divide
+   *  by. The calculator declines to score rather than fall back to a
+   *  global figure that would be off by 2-5x. */
+  | "benchmark-unavailable";
 
 export type ScoreResult =
   | { ok: true; breakdown: ScoreBreakdown }

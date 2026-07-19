@@ -1,12 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  averageAnnualWage,
-  GLOBAL_MEDIAN_WAGE_USD,
-  GLOBAL_MEDIAN_SOURCE,
-  GLOBAL_MEDIAN_WAGE_YEAR,
-  WAGE_SOURCE,
-  WAGE_YEAR,
-} from "@/lib/medianWages";
+import { averageAnnualWage, WAGE_SOURCE, WAGE_YEAR } from "@/lib/medianWages";
 import { pppFactors } from "@/lib/ppp";
 
 describe("averageAnnualWage", () => {
@@ -36,17 +29,5 @@ describe("averageAnnualWage", () => {
 
   it("discloses that the country table holds means, not medians", () => {
     expect(WAGE_SOURCE).toMatch(/mean/i);
-  });
-
-  it("has a plausible global fallback", () => {
-    expect(GLOBAL_MEDIAN_WAGE_USD).toBeGreaterThan(5_000);
-    expect(GLOBAL_MEDIAN_WAGE_USD).toBeLessThan(100_000);
-  });
-
-  it("dates the global fallback separately from the OECD table", () => {
-    // The two sources have different vintages; one year constant would
-    // misreport staleness for whichever path it does not describe.
-    expect(GLOBAL_MEDIAN_SOURCE.length).toBeGreaterThan(10);
-    expect(GLOBAL_MEDIAN_WAGE_YEAR).toBeGreaterThan(2015);
   });
 });

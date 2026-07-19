@@ -205,4 +205,27 @@ describe("calculateScore — error handling", () => {
     if (!r.ok) throw new Error("expected ok");
     expect(r.breakdown.officeDaysRatio).toBe(0);
   });
+
+  it("declines to score an uncovered country with no user estimate", () => {
+    // AF has no OECD wage figure and the input gives no expectedSalary, so
+    // there is no honest benchmark to divide by — the calculator must
+    // refuse rather than silently fall back to a global figure.
+    const r = calculateScore(
+      baseInput({ country: "AF", expectedSalary: null }),
+    );
+    expect(r).toEqual({ ok: false, reason: "benchmark-unavailable" });
+  });
+
+  it("still scores an uncovered country when the user supplies an estimate", () => {
+    // The user's own figure is accurate for their market regardless of
+    // whether OECD publishes a wage figure for that country.
+    const r = calculateScore(
+      baseInput({ country: "AF", expectedSalary: 60_000 }),
+    );
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.breakdown.benchmarkSource).toBe("user");
+      expect(Number.isFinite(r.breakdown.score)).toBe(true);
+    }
+  });
 });
