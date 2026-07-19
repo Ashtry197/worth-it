@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 /** "" means the user cleared the field, which scores as a missing value.
  *  Anything unparseable yields NaN, which lib/scoring.ts rejects with a
@@ -26,19 +26,23 @@ export function NumberField({
   // numeric keypad on mobile without the sanitisation.
   const [draft, setDraft] = useState(() => String(value));
 
-  // Re-sync only when the parent's value genuinely diverges from the draft,
-  // so external resets land while ordinary typing is never overwritten.
+  // Re-sync during render rather than in an effect, per React's
+  // "You Might Not Need an Effect": tracking the previous prop lets us
+  // adjust state as we render, so there is no frame where a stale draft
+  // is painted and then corrected. Fires only when the parent changed the
+  // value for reasons other than our own typing, so external resets land
+  // while ordinary typing is never overwritten.
   // Object.is, not ===, so a NaN draft matches a NaN value.
-  useEffect(() => {
-    // This is the "adjust state when a prop changes" exception (react.dev),
-    // not a derived-render candidate: it must compare against the previous
-    // draft, which only exists once this effect has already committed.
+  const [lastValue, setLastValue] = useState(value);
+  if (!Object.is(lastValue, value)) {
+    // Track the prop unconditionally, even when the change came from our own
+    // typing — otherwise lastValue goes stale and a later reset back to it
+    // would look like "no change" and be ignored.
+    setLastValue(value);
     if (!Object.is(parseDraft(draft), value)) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDraft(Number.isFinite(value) ? String(value) : "");
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value]);
+  }
 
   return (
     <label className="block">
