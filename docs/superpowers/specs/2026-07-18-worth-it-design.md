@@ -102,7 +102,7 @@ comparison, not an index.
 | Canteen and shuttle-bus coefficients | Chinese/Japanese corporate norms; noise elsewhere, and modelled as arbitrary multipliers | Replaced by healthcare, pension match, PTO, and remote days — each counted structurally (money as money, time as time) rather than as a coefficient |
 | Employer tiers (civil service, SOE, foreign firm, dispatch worker) | China-specific, partly Japanese | Public sector / Non-profit / Large private / Startup / Contract or agency / Self-employed |
 | `cityFactor` = proximity to hometown | Encodes a specific migration pattern | Optional metro cost-of-living adjustment — country PPP can't distinguish San Francisco from Ohio |
-| PPP anchored to CNY (4.19) | Scores read as Chinese-relative | Anchored to USD; 178-country picker retained |
+| PPP anchored to CNY (4.19) | Scores read as Chinese-relative | Anchored to USD; 179-country picker retained |
 
 ### Benchmark
 
@@ -143,7 +143,7 @@ worth-it/
 │   └── HistoryList.tsx     saved results
 └── lib/
     ├── scoring.ts          pure; the actual product
-    ├── ppp.ts              178-country table, ported verbatim
+    ├── ppp.ts              179-country table, ported verbatim
     ├── benchmark.ts        user input with per-country median fallback
     ├── storage.ts          localStorage behind a validating wrapper
     └── types.ts
