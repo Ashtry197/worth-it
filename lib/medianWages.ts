@@ -1,31 +1,30 @@
 /**
- * Country wage benchmarks in PPP USD, used ONLY when the user leaves the
+ * Fallback wage benchmarks in PPP USD, used ONLY when the user leaves the
  * expected-salary field blank.
  *
- * ## IMPORTANT: these are MEANS, not medians
+ * Two different statistics live here, and the difference is not cosmetic:
  *
- * The export is named `medianAnnualWage` because that is what the benchmark
- * module consumes, but the per-country figures below are OECD *average* (mean)
- * annual wages. OECD's `AV_AN_WAGE` publishes only a mean series — its
- * `AGGREGATION_OPERATION` dimension has the single value `MEAN` — and its
- * companion earnings dataset (`DEC_I`) publishes only decile *ratios*, never
- * median wage levels in PPP USD. No genuine median level series was available.
+ * - `averageAnnualWage` is an OECD **mean**, not a median. OECD's
+ *   `AV_AN_WAGE` publishes no median variant — its `AGGREGATION_OPERATION`
+ *   dimension has the single value `MEAN` — and its companion earnings
+ *   dataset (`DEC_I`) publishes only decile *ratios*, never median wage
+ *   levels in PPP USD. No genuine per-country median level series was
+ *   available from either dataset. Means run roughly 15-20% above medians
+ *   because the top tail drags the average up, so this table biases the
+ *   benchmark HIGH, which makes scores computed against it read slightly
+ *   LOW. Do not present these numbers to users as medians.
+ * - `GLOBAL_MEDIAN_WAGE_USD` is a true ILO **median**, and from a different
+ *   year (2021 vs. the OECD table's 2025) — see `GLOBAL_MEDIAN_SOURCE` and
+ *   `GLOBAL_MEDIAN_WAGE_YEAR` below. The fallback path and the per-country
+ *   path are therefore not measuring the same statistic, nor the same
+ *   vintage. This is a known, accepted wart rather than an oversight.
  *
- * Mean wages sit meaningfully above medians because the top tail drags the
- * average up; in most OECD countries the median is roughly 80-85% of the mean.
- * So this table biases the benchmark HIGH, which makes scores computed against
- * it read slightly LOW. Do not present these numbers to users as medians.
- *
- * `GLOBAL_MEDIAN_WAGE_USD` is a true median (ILO), so the fallback path and the
- * per-country path are not measuring the same statistic. This is a known,
- * accepted wart rather than an oversight.
- *
- * ## Second caveat: all-role aggregates
- *
- * Every figure is a whole-economy country aggregate across all occupations,
- * industries and seniority levels. It is a coarse proxy for any individual's
- * market rate — a nurse and a derivatives trader in the same country share one
- * number here. The UI must label the fallback benchmark as approximate.
+ * Both are all-role, whole-economy country aggregates across all
+ * occupations, industries and seniority levels — a coarse proxy for any
+ * individual's market rate; a nurse and a derivatives trader in the same
+ * country share one number here. The UI must label which benchmark a given
+ * score used, and from which year — see `benchmarkSource` in
+ * `ScoreBreakdown` (lib/types.ts).
  *
  * ## Provenance
  *
@@ -45,15 +44,15 @@
  * Countries with no sourced figure are deliberately absent — callers fall back
  * to `GLOBAL_MEDIAN_WAGE_USD` rather than to an invented number.
  */
-export const MEDIAN_WAGE_SOURCE =
+export const WAGE_SOURCE =
   "OECD Average annual wages (AV_AN_WAGE), constant-price PPP USD — mean, not median";
-export const MEDIAN_WAGE_YEAR = 2025;
+export const WAGE_YEAR = 2025;
 
 /**
  * Average annual wage per full-time equivalent employee, constant 2025 prices,
  * PPP-converted USD. Values rounded to whole dollars from the OECD series.
  */
-export const medianAnnualWage: Record<string, number> = {
+export const averageAnnualWage: Record<string, number> = {
   US: 86977, // 86977.138
   GB: 66299, // 66299.139
   CA: 67901, // 67900.601
@@ -67,6 +66,13 @@ export const medianAnnualWage: Record<string, number> = {
   IT: 53864, // 53864.157
   JP: 50183, // 50182.646
 };
+
+/**
+ * ILO Global Wage Report global median, annualised. Different statistic and
+ * different vintage from the OECD table above — hence its own constants.
+ */
+export const GLOBAL_MEDIAN_SOURCE = "ILO Global Wage Report 2024-25";
+export const GLOBAL_MEDIAN_WAGE_YEAR = 2021;
 
 /**
  * ILO Global Wage Report 2024-25 global median, annualised: US$846 PPP per

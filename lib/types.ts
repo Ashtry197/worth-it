@@ -47,7 +47,12 @@ export interface ScoreBreakdown {
   rawHourly: number;
   qualityMultiplier: number;
   benchmark: number;
-  benchmarkSource: "user" | "fallback";
+  /** Which yardstick the score was measured against. These differ in both
+   *  statistic and vintage, so the UI must label which one was used:
+   *  - "user"            the user's own estimate
+   *  - "country-average" OECD mean annual wage, 2025, 12 countries
+   *  - "global-median"   ILO global median wage, 2021, everywhere else */
+  benchmarkSource: "user" | "country-average" | "global-median";
   score: number;
 }
 
