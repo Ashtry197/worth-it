@@ -42,62 +42,60 @@ function Gauge({ score, tone }: { score: number; tone: string }) {
   const pinned = score > GAUGE_MAX;
   const position = Math.min(Math.max(score / GAUGE_MAX, 0), 1) * 100;
 
+  const needleTone =
+    tone === "text-rust"
+      ? "bg-rust"
+      : tone === "text-moss"
+        ? "bg-moss"
+        : "bg-cobalt";
+
   return (
-    <div className="pt-10">
-      {/* Readout rides above the needle rather than sitting apart from it. */}
-      <div
-        className="relative h-12 transition-[margin] duration-500 ease-out"
-        style={{ marginLeft: `${position}%` }}
-      >
-        <div className="absolute bottom-0 -translate-x-1/2 text-center whitespace-nowrap">
-          <span
-            data-testid="score-value"
-            className={`tnum block text-4xl leading-none font-semibold sm:text-5xl ${tone}`}
-          >
-            {pinned ? "2+" : score.toFixed(2)}
-          </span>
-          <span className={`mt-1 block text-[0.6875rem] tracking-wide ${tone}`}>
-            {pinned ? score.toFixed(2) : ""}
-          </span>
-        </div>
-      </div>
-
-      <div className="relative h-9">
+    // Inset so the 0.0 and 2.0 marks — and their labels — sit inside the
+    // card rather than being clipped at its edge.
+    <div className="px-3 pt-6">
+      <div className="relative h-11">
         {/* the scale */}
-        <div className="absolute inset-x-0 top-0 h-px bg-rule" />
+        <div className="absolute inset-x-0 top-2 h-px bg-rule" />
 
-        {/* the datum — the whole point of the instrument */}
-        <div className="absolute top-0 left-1/2 h-3 w-px -translate-x-1/2 bg-ink" />
-        <span className="eyebrow absolute top-4 left-1/2 -translate-x-1/2 text-ink">
-          1.00 · market
-        </span>
+        {TICKS.map((t) => {
+          const datum = t === 1;
+          return (
+            <div
+              key={t}
+              className="absolute top-2 -translate-x-1/2"
+              style={{ left: `${(t / GAUGE_MAX) * 100}%` }}
+            >
+              <div
+                className={datum ? "h-2.5 w-px bg-ink" : "h-1.5 w-px bg-rule"}
+              />
+              <span
+                className={`tnum absolute left-1/2 -translate-x-1/2 whitespace-nowrap text-[0.625rem] ${
+                  datum ? "top-3.5 text-ink" : "top-2.5 text-graphite"
+                }`}
+              >
+                {t === GAUGE_MAX ? "2.0+" : t.toFixed(1)}
+              </span>
+              {datum && (
+                <span className="eyebrow absolute top-7 left-1/2 -translate-x-1/2 text-[0.5625rem] whitespace-nowrap">
+                  market
+                </span>
+              )}
+            </div>
+          );
+        })}
 
-        {TICKS.filter((t) => t !== 1).map((t) => (
-          <div
-            key={t}
-            className="absolute top-0 w-px bg-rule"
-            style={{ left: `${(t / GAUGE_MAX) * 100}%`, height: "0.5rem" }}
-          >
-            <span className="tnum absolute top-2.5 left-1/2 -translate-x-1/2 text-[0.625rem] text-graphite">
-              {t.toFixed(1)}
-            </span>
-          </div>
-        ))}
-
-        {/* the needle */}
+        {/* the needle — a marker on the scale, carrying no text of its own */}
         <div
           className="absolute top-0 -translate-x-1/2 transition-[left] duration-500 ease-out"
           style={{ left: `${position}%` }}
+          aria-hidden="true"
         >
-          <div
-            className={`h-5 w-0.5 ${
-              tone === "text-rust"
-                ? "bg-rust"
-                : tone === "text-moss"
-                  ? "bg-moss"
-                  : "bg-cobalt"
-            }`}
-          />
+          <div className={`h-4 w-[3px] rounded-full ${needleTone}`} />
+          {pinned && (
+            <span className={`absolute -top-0.5 left-2 text-[0.625rem] ${tone}`}>
+              ›
+            </span>
+          )}
         </div>
       </div>
     </div>
@@ -144,12 +142,21 @@ export function ScoreDisplay({ result }: { result: ScoreResult }) {
     >
       <p className="eyebrow">Your rate against the market</p>
 
-      <Gauge score={b.score} tone={tone} />
-
-      <p className={`mt-8 font-display text-lg ${tone}`}>{label}</p>
+      {/* The score is the thing they came for, so it leads and never hides
+          behind a placeholder — an earlier version showed "2+" large with the
+          real figure in small text, which buried the answer. */}
+      <p
+        data-testid="score-value"
+        className={`tnum mt-3 text-5xl leading-none font-semibold sm:text-6xl ${tone}`}
+      >
+        {b.score.toFixed(2)}
+      </p>
+      <p className={`mt-2 font-display text-lg ${tone}`}>{label}</p>
       <p className="mt-1 text-xs text-graphite">
         1.00 means typical for your market.
       </p>
+
+      <Gauge score={b.score} tone={tone} />
 
       <dl className="mt-6 border-t border-rule pt-2">
         <Row term="Total compensation (local currency)">{money(b.totalComp)}</Row>
