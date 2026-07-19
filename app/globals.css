@@ -1,26 +1,122 @@
 @import "tailwindcss";
 
+/* Worth It — "rate card"
+   A drafting-vellum ground with cobalt as the single instrument signal.
+   Dark mode keeps the same instrument, lit from behind rather than above. */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --vellum: #e6eae2;
+  --card: #f3f5f0;
+  --ink: #161c17;
+  --graphite: #6c776e;
+  --rule: #ccd2c7;
+  --cobalt: #2438d8;
+  --rust: #9a3a1b;
+  --moss: #2f6a4f;
+  --grid: rgb(22 28 23 / 0.04);
+  color-scheme: light;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
+/* Dark by system preference, unless the reader has explicitly chosen light. */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  :root:not([data-theme="light"]) {
+    --vellum: #101410;
+    --card: #171d18;
+    --ink: #e4e8e0;
+    --graphite: #8d9a90;
+    --rule: #2a322c;
+    --cobalt: #7f90ff;
+    --rust: #e2916a;
+    --moss: #7cc09b;
+    --grid: rgb(228 232 224 / 0.045);
+    color-scheme: dark;
   }
 }
 
+/* An explicit choice always wins over the system preference. */
+:root[data-theme="dark"] {
+  --vellum: #101410;
+  --card: #171d18;
+  --ink: #e4e8e0;
+  --graphite: #8d9a90;
+  --rule: #2a322c;
+  --cobalt: #7f90ff;
+  --rust: #e2916a;
+  --moss: #7cc09b;
+  --grid: rgb(228 232 224 / 0.045);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-vellum: var(--vellum);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-graphite: var(--graphite);
+  --color-rule: var(--rule);
+  --color-cobalt: var(--cobalt);
+  --color-rust: var(--rust);
+  --color-moss: var(--moss);
+
+  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--vellum);
+  color: var(--ink);
+  font-family: var(--font-sans);
+
+  /* Faint drafting grid — the paper this instrument is calibrated on. */
+  background-image:
+    linear-gradient(to right, var(--grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* Figures in a rate card align like a ledger. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--graphite);
+}
+
+/* Pointer feedback. Without these the label wrapper's default arrow wins and
+   a text field gives no sign it can be typed into. */
+input[type="text"] {
+  cursor: text;
+  caret-color: var(--cobalt);
+}
+
+/* The native dropdown arrow is kept deliberately: `color-scheme` above makes
+   the browser draw it correctly in both themes, which a hand-rolled SVG in a
+   data URI cannot do (custom properties don't resolve inside one). */
+select {
+  cursor: pointer;
+}
+
+label {
+  cursor: default;
+}
+
+:focus-visible {
+  outline: 2px solid var(--cobalt);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

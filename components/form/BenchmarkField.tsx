@@ -30,7 +30,8 @@ export function BenchmarkField({
     <Section title="Benchmark">
       <NumberField
         label="Typical salary for your role"
-        hint="Optional, but makes your score far more meaningful"
+        hint="What you think someone doing your job usually earns. Optional, but it makes the score far more meaningful — and it's the only way to get one if your country isn't covered below."
+        unit="per year"
         value={value.expectedSalary ?? 0}
         onChange={(n) => onChange({ expectedSalary: n > 0 ? n : null })}
       />
@@ -43,17 +44,20 @@ export function BenchmarkField({
       />
       <SelectField
         label="Education"
+        hint="Your highest completed level. Only used when the salary above is blank."
         value={value.education}
         options={EDUCATION}
         onChange={(education) => onChange({ education })}
       />
       <NumberField
         label="Years of experience"
+        hint="Total working years in this field. Only used when the salary above is blank."
+        unit="years"
         value={value.yearsExperience}
         onChange={(yearsExperience) => onChange({ yearsExperience })}
       />
       {usingFallback && (
-        <p className="text-xs text-gray-500 sm:col-span-2">
+        <p className="text-xs text-graphite sm:col-span-2">
           No estimate given, so your score is measured against published wage
           data for your country, adjusted for education and experience. This
           is only available for {Object.keys(averageAnnualWage).length}{" "}

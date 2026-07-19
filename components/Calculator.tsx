@@ -38,14 +38,14 @@ export function Calculator() {
   const result = calculateScore(input);
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[2fr_1fr]">
-      <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+    <div className="grid gap-10 lg:grid-cols-[1fr_23rem] lg:gap-14">
+      <form className="space-y-10" onSubmit={(e) => e.preventDefault()}>
         <CompensationFields value={input} onChange={onChange} />
         <TimeFields value={input} onChange={onChange} />
         <QualityFields value={input} onChange={onChange} />
         <BenchmarkField value={input} onChange={onChange} />
       </form>
-      <aside className="lg:sticky lg:top-8 lg:self-start">
+      <aside className="lg:sticky lg:top-10 lg:self-start">
         <ScoreDisplay result={result} />
       </aside>
     </div>

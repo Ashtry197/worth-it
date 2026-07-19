@@ -11,10 +11,14 @@ function parseDraft(text: string): number {
 }
 
 export function NumberField({
-  label, hint, value, onChange,
+  label, hint, unit, value, onChange,
 }: {
   label: string;
   hint?: string;
+  /** What the figure is measured in — "hours", "days", "money per year".
+   *  Shown inside the field so the unit is visible while typing, not only
+   *  while reading the label. */
+  unit?: string;
   value: number;
   onChange: (n: number) => void;
 }) {
@@ -46,18 +50,29 @@ export function NumberField({
 
   return (
     <label className="block">
-      <span className="text-sm font-medium">{label}</span>
-      {hint && <span className="block text-xs text-gray-500">{hint}</span>}
-      <input
-        type="text"
-        inputMode="decimal"
-        className="mt-1 w-full rounded border px-2 py-1"
-        value={draft}
-        onChange={(e) => {
-          setDraft(e.target.value);
-          onChange(parseDraft(e.target.value));
-        }}
-      />
+      <span className="text-sm font-medium text-ink">{label}</span>
+      {hint && <span className="mt-0.5 block text-xs text-graphite">{hint}</span>}
+      <span className="relative mt-1.5 block">
+        <input
+          type="text"
+          inputMode="decimal"
+          className="tnum w-full rounded-md border border-rule bg-card py-2 pl-3 text-sm text-ink transition-colors hover:border-graphite/60 focus:border-cobalt focus:outline-none"
+          style={{ paddingRight: unit ? "5.5rem" : "0.75rem" }}
+          value={draft}
+          onChange={(e) => {
+            setDraft(e.target.value);
+            onChange(parseDraft(e.target.value));
+          }}
+        />
+        {unit && (
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs text-graphite"
+          >
+            {unit}
+          </span>
+        )}
+      </span>
     </label>
   );
 }
@@ -73,10 +88,10 @@ export function SelectField<T extends string>({
 }) {
   return (
     <label className="block">
-      <span className="text-sm font-medium">{label}</span>
-      {hint && <span className="block text-xs text-gray-500">{hint}</span>}
+      <span className="text-sm font-medium text-ink">{label}</span>
+      {hint && <span className="mt-0.5 block text-xs text-graphite">{hint}</span>}
       <select
-        className="mt-1 w-full rounded border px-2 py-1"
+        className="mt-1.5 w-full rounded-md border border-rule bg-card px-3 py-2 text-sm text-ink transition-colors hover:border-graphite/60 focus:border-cobalt focus:outline-none"
         value={value}
         onChange={(e) => onChange(e.target.value as T)}
       >
@@ -88,11 +103,25 @@ export function SelectField<T extends string>({
   );
 }
 
-export function Section({ title, children }: { title: string; children: ReactNode }) {
+export function Section({
+  title,
+  note,
+  children,
+}: {
+  title: string;
+  /** A unit or scope that applies to the whole group, so it is stated once
+   *  rather than repeated in every field's hint. */
+  note?: string;
+  children: ReactNode;
+}) {
   return (
-    <section className="space-y-3">
-      <h2 className="text-lg font-semibold">{title}</h2>
-      <div className="grid gap-3 sm:grid-cols-2">{children}</div>
+    <section>
+      {/* The rule doubles as the section's ledger line — structure, not decoration. */}
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-rule pb-2">
+        <h2 className="eyebrow text-ink">{title}</h2>
+        {note && <p className="text-xs text-graphite">{note}</p>}
+      </div>
+      <div className="grid gap-5 pt-5 sm:grid-cols-2">{children}</div>
     </section>
   );
 }
